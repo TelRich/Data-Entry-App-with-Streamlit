@@ -2,8 +2,8 @@ import streamlit as st
 import pandas as pd
 
 
-username = st.secrets('user')
-password = st.secrets('pw')
+username = st.secrets['user']
+password = st.secrets['pw']
 host = 'telrichserver.postgres.database.azure.com'
 database = 'newdb'
 
