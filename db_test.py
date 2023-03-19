@@ -53,6 +53,7 @@ results = cur.fetchall()
 
 # Create a pandas DataFrame from the results and display it on Streamlit
 df = pd.DataFrame(results)
+st.header('Table From My Remote Database on Streamlit')
 st.write(df)
 
 # Close the database connection
