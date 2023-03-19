@@ -37,7 +37,7 @@ import pandas as pd
 username = st.secrets['user']
 password = st.secrets['pw']
 host = 'telrichserver.postgres.database.azure.com'
-database = 'newdb'
+database = 'phone_db'
 port = '5432'  # or your specified port number
 sslmode = 'require'  # or 'prefer' if you don't want to use SSL encryption
 conn_str = f"postgresql://{username}:{password}@{host}:{port}/{database}?sslmode={sslmode}"
@@ -46,7 +46,7 @@ conn_str = f"postgresql://{username}:{password}@{host}:{port}/{database}?sslmode
 conn = psycopg2.connect(conn_str)
 
 # Execute a SQL query and fetch the results
-query = 'SELECT * FROM bus_breakdown_delay LIMIT 5'
+query = 'SELECT * FROM phone_sales'
 cur = conn.cursor()
 cur.execute(query)
 results = cur.fetchall()
