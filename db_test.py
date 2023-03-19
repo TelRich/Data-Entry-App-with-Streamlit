@@ -54,7 +54,7 @@ sold_price = st.number_input('Enter sold price')
 cost_price = st.number_input('Enter cost price')
 
 if st.button('Save Details'):
-    query = '''INSERT INTO phone_sales (phone_brand, phone_model, purchase_date, sold_date, sold_price, cost_price)
+    query = f'''INSERT INTO phone_sales (phone_brand, phone_model, purchase_date, sold_date, sold_price, cost_price)
     VALUES ({phone_brand}, {phone_model}, {purchase_date}, {sold_date}, {sold_price}, {cost_price})'''
     cur.execute(query)
 
