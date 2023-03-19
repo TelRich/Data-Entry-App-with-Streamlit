@@ -62,15 +62,15 @@ if st.button('Save Details'):
 # Execute a SQL query and fetch the results
 query = 'SELECT * FROM phone_sales'
 
-cur.execute(query)
-results = cur.fetchall()
+# cur.execute(query)
+# results = cur.fetchall()
 
 # Create a pandas DataFrame from the results and display it on Streamlit
-df = pd.DataFrame(results)
+# df = pd.DataFrame(results)
 df2 = pd.read_sql_query(query, conn)
 
 st.header('Table From My Remote Database on Streamlit')
-st.write(df)
+# st.write(df)
 st.write(df2)
 
 # Close the database connection
