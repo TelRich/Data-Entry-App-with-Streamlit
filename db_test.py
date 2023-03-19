@@ -14,20 +14,17 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 # Set up a connection string
-username = st.secrets['user']
-password = st.secrets['pw']
+username = 'test'
+password = '1234'
 host = 'telrichserver.postgres.database.azure.com'
-# port = 'your_port'
+port = '5432'
 database = 'newdb'
-conn_str = f'postgresql://{username}:{password}@{host}/{database}'
+conn_str = f'postgresql://{username}:{password}@{host}:{port}/{database}'
 
 # Create a connection engine
 engine = create_engine(conn_str)
-connection = engine.connect()
 
 # Execute a SQL query
 query = 'SELECT * FROM bus_breakdown_delay LIMIT 5'
 df = pd.read_sql_query(query, engine)
-
-connection.close()  # remember to close the connection
 st.write(df)
