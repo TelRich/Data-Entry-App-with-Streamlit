@@ -1,34 +1,3 @@
-# import streamlit as st
-# import pandas as pd
-
-
-# # username = 'test'
-# # password = st.secrets['pw']
-# # host = 'telrichserver.postgres.database.azure.com'
-# # database = 'newdb'
-
-# # conn_str = f'postgresql+psycopg2://{username}:{password}@{host}/{database}'
-
-
-
-# from sqlalchemy import create_engine
-
-# # Set up a connection string
-# username = 'test'
-# password = '1234'
-# host = 'telrichserver.postgres.database.azure.com'
-# port = '5432'
-# database = 'newdb'
-# conn_str = f'postgresql://{username}:{password}@{host}:{port}/{database}'
-
-# # Create a connection engine
-# engine = create_engine(conn_str)
-
-# # Execute a SQL query
-# query = 'SELECT * FROM bus_breakdown_delay LIMIT 5'
-# df = pd.read_sql_query(query, engine)
-# st.write(df)
-
 import psycopg2
 import streamlit as st
 import pandas as pd
@@ -46,20 +15,23 @@ conn_str = f"postgresql://{username}:{password}@{host}:{port}/{database}?sslmode
 conn = psycopg2.connect(conn_str)
 cur = conn.cursor()
 
-st.header('Data Entry into the table in the remote database')
+col1, col2 = st.columns([1, 3], gap='medium')
 
-phone_brand = st.text_input('Enter brand name')
-phone_model = st.text_input('Enter phone model')
-purchase_date = st.date_input('Enter purchase date')
-sold_date = st.date_input('Enter sold date')
-sold_price = st.number_input('Enter sold price')
-cost_price = st.number_input('Enter cost price')
+with col1:
+    st.header('Data Entry into the table in the remote database')
 
-if st.button('Save Details'):
-    query = f'''INSERT INTO phone_sales (phone_brand, phone_model, purchase_date, sold_date, sold_price, cost_price)
-    VALUES ('{phone_brand}', '{phone_model}', '{purchase_date}', '{sold_date}', '{sold_price}', '{cost_price}')'''
-    cur.execute(query)
-    conn.commit()
+    phone_brand = st.text_input('Enter brand name')
+    phone_model = st.text_input('Enter phone model')
+    purchase_date = st.date_input('Enter purchase date')
+    sold_date = st.date_input('Enter sold date')
+    sold_price = st.number_input('Enter sold price')
+    cost_price = st.number_input('Enter cost price')
+
+    if st.button('Save Details'):
+        query = f'''INSERT INTO phone_sales (phone_brand, phone_model, purchase_date, sold_date, sold_price, cost_price)
+        VALUES ('{phone_brand}', '{phone_model}', '{purchase_date}', '{sold_date}', '{sold_price}', '{cost_price}')'''
+        cur.execute(query)
+        conn.commit()
 
 # Execute a SQL query and fetch the results
 query = 'SELECT * FROM phone_sales ORDER BY id DESC LIMIT 3'
@@ -71,9 +43,10 @@ query = 'SELECT * FROM phone_sales ORDER BY id DESC LIMIT 3'
 # df = pd.DataFrame(results)
 df2 = pd.read_sql_query(query, conn)
 
-st.header('Table From Remote Database (Last three entry)')
-# st.write(df)
-st.table(df2)
+with col2:
+    st.header('Table From Remote Database (Last three entry)')
+    # st.write(df)
+    st.table(df2)
 
 # Close the database connection
 cur.close()
