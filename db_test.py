@@ -46,6 +46,8 @@ conn_str = f"postgresql://{username}:{password}@{host}:{port}/{database}?sslmode
 conn = psycopg2.connect(conn_str)
 cur = conn.cursor()
 
+st.header('Data Entry into the table in the remote database')
+
 phone_brand = st.text_input('Enter brand name')
 phone_model = st.text_input('Enter phone model')
 purchase_date = st.date_input('Enter purchase date')
@@ -60,7 +62,7 @@ if st.button('Save Details'):
     conn.commit()
 
 # Execute a SQL query and fetch the results
-query = 'SELECT * FROM phone_sales'
+query = 'SELECT * FROM phone_sales ORDER BY id DESC LIMIT 3'
 
 # cur.execute(query)
 # results = cur.fetchall()
