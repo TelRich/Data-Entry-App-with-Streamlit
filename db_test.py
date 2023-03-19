@@ -23,8 +23,11 @@ conn_str = f'postgresql://{username}:{password}@{host}/{database}'
 
 # Create a connection engine
 engine = create_engine(conn_str)
+connection = engine.connect()
 
 # Execute a SQL query
 query = 'SELECT * FROM bus_breakdown_delay LIMIT 5'
-df = pd.read_sql_query(query, engine)
+df = pd.read_sql_query(query, connection)
+
+connection.close()  # remember to close the connection
 st.write(df)
