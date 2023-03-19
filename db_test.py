@@ -57,6 +57,7 @@ if st.button('Save Details'):
     query = f'''INSERT INTO phone_sales (phone_brand, phone_model, purchase_date, sold_date, sold_price, cost_price)
     VALUES ('{phone_brand}', '{phone_model}', '{purchase_date}', '{sold_date}', '{sold_price}', '{cost_price}')'''
     cur.execute(query)
+    cur.close()
 
 # Execute a SQL query and fetch the results
 query = 'SELECT * FROM phone_sales'
