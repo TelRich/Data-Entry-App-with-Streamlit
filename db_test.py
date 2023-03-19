@@ -44,10 +44,16 @@ conn_str = f"postgresql://{username}:{password}@{host}:{port}/{database}?sslmode
 
 # Connect to the database
 conn = psycopg2.connect(conn_str)
+cur = conn.cursor()
+
+
+query = '''INSERT INTO phone_sales (phone_brand, phone_model, purchase_date, sold_date, sold_price, cost_price)
+VALUES ('Apple', 'iPhone 10 Pro', '2022-10-04', '2022-10-25', 1200.00, 900.00)'''
+cur.execute(query)
 
 # Execute a SQL query and fetch the results
 query = 'SELECT * FROM phone_sales'
-cur = conn.cursor()
+
 cur.execute(query)
 results = cur.fetchall()
 
