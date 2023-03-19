@@ -27,7 +27,7 @@ connection = engine.connect()
 
 # Execute a SQL query
 query = 'SELECT * FROM bus_breakdown_delay LIMIT 5'
-df = pd.read_sql_query(query, connection)
+df = pd.read_sql_query(query, engine)
 
 connection.close()  # remember to close the connection
 st.write(df)
