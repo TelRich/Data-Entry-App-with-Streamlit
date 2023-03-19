@@ -71,7 +71,7 @@ query = 'SELECT * FROM phone_sales ORDER BY id DESC LIMIT 3'
 # df = pd.DataFrame(results)
 df2 = pd.read_sql_query(query, conn)
 
-st.header('Table From My Remote Database on Streamlit')
+st.header('Table From Remote Database (Last three entry)')
 # st.write(df)
 st.table(df2)
 
