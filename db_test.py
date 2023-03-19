@@ -46,10 +46,17 @@ conn_str = f"postgresql://{username}:{password}@{host}:{port}/{database}?sslmode
 conn = psycopg2.connect(conn_str)
 cur = conn.cursor()
 
+phone_brand = st.text_input('Enter brand name')
+phone_model = st.text_input('Enter phone model')
+purchase_date = st.date_input('Enter purchase date')
+sold_date = st.date_input('Enter sold date')
+sold_price = st.number_input('Enter sold price')
+cost_price = st.number_input('Enter cost price')
 
-query = '''INSERT INTO phone_sales (phone_brand, phone_model, purchase_date, sold_date, sold_price, cost_price)
-VALUES ('Apple', 'iPhone 10 Pro', '2022-10-04', '2022-10-25', 1200.00, 900.00)'''
-cur.execute(query)
+if st.button('Save Details'):
+    query = '''INSERT INTO phone_sales (phone_brand, phone_model, purchase_date, sold_date, sold_price, cost_price)
+    VALUES ({phone_brand}, {phone_model}, {purchase_date}, {sold_date}, {sold_price}, {cost_price})'''
+    cur.execute(query)
 
 # Execute a SQL query and fetch the results
 query = 'SELECT * FROM phone_sales'
