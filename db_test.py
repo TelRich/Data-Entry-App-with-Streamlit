@@ -1,6 +1,10 @@
 import psycopg2
 import streamlit as st
 import pandas as pd
+import plotly.express as px
+
+
+st. set_page_config(layout="wide")
 
 # Set up a connection string
 username = st.secrets['user']
@@ -15,10 +19,10 @@ conn_str = f"postgresql://{username}:{password}@{host}:{port}/{database}?sslmode
 conn = psycopg2.connect(conn_str)
 cur = conn.cursor()
 
-col1, col2 = st.columns([1, 3], gap='medium')
+col1, col2 = st.columns([2, 8], gap='large')
 
 with col1:
-    st.header('Data Entry into the table in the remote database')
+    st.subheader('Sales Entry')
 
     phone_brand = st.text_input('Enter brand name')
     phone_model = st.text_input('Enter phone model')
@@ -43,10 +47,22 @@ query = 'SELECT * FROM phone_sales ORDER BY id DESC LIMIT 3'
 # df = pd.DataFrame(results)
 df2 = pd.read_sql_query(query, conn)
 
+query3 = 'SELECT phone_brand,SUM(profit) profit, SUM(cost_price) cost_price, SUM(sold_price) sold_price FROM phone_sales GROUP BY phone_brand'
+df3 = pd.read_sql_query(query3, conn)
+fig1 = px.bar(df3, 'phone_brand', 'profit')
+fig2 = px.bar(df3, 'phone_brand', ['cost_price', 'sold_price'], barmode='group')
+
 with col2:
     st.header('Table From Remote Database (Last three entry)')
     # st.write(df)
     st.table(df2)
+    col21, col22 = st.columns(2)
+    with col21:
+        st.plotly_chart(fig1)
+    with col22:
+        st.plotly_chart(fig2)
+
+
 
 # Close the database connection
 cur.close()
