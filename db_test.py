@@ -1,9 +1,11 @@
+# Importing requires libraries
 import psycopg2
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import base64
 
-
+# setting the page size
 st. set_page_config(layout="wide")
 
 # Set up a connection string
@@ -19,6 +21,7 @@ conn_str = f"postgresql://{username}:{password}@{host}:{port}/{database}?sslmode
 conn = psycopg2.connect(conn_str)
 cur = conn.cursor()
 
+# Split the page into two column
 col1, col2 = st.columns([2, 8], gap='large')
 
 with col1:
@@ -37,31 +40,63 @@ with col1:
         cur.execute(query)
         conn.commit()
 
-# Execute a SQL query and fetch the results
+row_count = '''
+SELECT 
+    COUNT(*) table_rows
+FROM
+    phone_sales
+'''
+table_rw = pd.read_sql_query(row_count, conn)
+rw_num= table_rw['table_rows'][0]
+col1.write(f'There are now {rw_num} rows in the table')
+
+if rw_num == 20:
+    query = """
+    DELETE FROM phone_sales
+    WHERE id <=5  
+    """
+    cur.execute(query)
+    conn.commit()
+
 query = 'SELECT * FROM phone_sales ORDER BY id DESC LIMIT 3'
-
-# cur.execute(query)
-# results = cur.fetchall()
-
-# Create a pandas DataFrame from the results and display it on Streamlit
-# df = pd.DataFrame(results)
 df2 = pd.read_sql_query(query, conn)
 
-query3 = 'SELECT phone_brand,SUM(profit) profit, SUM(cost_price) cost_price, SUM(sold_price) sold_price FROM phone_sales GROUP BY phone_brand'
+query3 = '''
+SELECT 
+    phone_brand,
+    SUM(profit) profit, 
+    SUM(cost_price) cost_price, 
+    SUM(sold_price) 
+    sold_price 
+FROM 
+    phone_sales 
+GROUP BY 
+    phone_brand'''
+                
 df3 = pd.read_sql_query(query3, conn)
 fig1 = px.bar(df3, 'phone_brand', 'profit')
 fig2 = px.bar(df3, 'phone_brand', ['cost_price', 'sold_price'], barmode='group')
 
 with col2:
     st.header('Table From Remote Database (Last three entry)')
-    # st.write(df)
     st.table(df2)
+    newTableRw = pd.read_sql_query(row_count, conn)
+    newRwNum = newTableRw['table_rows'][0]
+    text1 = f'There are a total of {newRwNum} rows in the database'
+    st.write(text1)
+   
     col21, col22 = st.columns(2)
     with col21:
         st.plotly_chart(fig1)
     with col22:
         st.plotly_chart(fig2)
-
+        
+# Create a download button that downloads the DataFrame as a CSV file
+if st.button('Download CSV'):
+    csv = df2.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()
+    href = f'<a href="data:file/csv;base64,{b64}" download="mydata.csv">Download CSV</a>'
+    st.markdown(href, unsafe_allow_html=True)
 
 
 # Close the database connection
