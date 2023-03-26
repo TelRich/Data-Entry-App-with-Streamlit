@@ -4,23 +4,26 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import base64
+import io
 
 # setting the page size
 st. set_page_config(layout="wide")
-
-# Set up a connection string
-username = st.secrets['user']
-password = st.secrets['pw']
-host = 'telrichserver.postgres.database.azure.com'
-database = 'phone_db'
-port = '5432'  # or your specified port number
-sslmode = 'require'  # or 'prefer' if you don't want to use SSL encryption
-conn_str = f"postgresql://{username}:{password}@{host}:{port}/{database}?sslmode={sslmode}"
+def connect_db():
+    # Set up a connection string
+    username = st.secrets['user']
+    password = st.secrets['pw']
+    host = 'telrichserver.postgres.database.azure.com'
+    database = 'phone_db'
+    port = '5432'  # or your specified port number
+    sslmode = 'require'  # or 'prefer' if you don't want to use SSL encryption
+    conn_str = f"postgresql://{username}:{password}@{host}:{port}/{database}?sslmode={sslmode}"
+    return conn_str
 
 # Connect to the database
-conn = psycopg2.connect(conn_str)
+conn = psycopg2.connect(connect_db())
 cur = conn.cursor()
 
+connect_db()
 # Split the page into two column
 col1, col2 = st.columns([2, 8], gap='large')
 
@@ -91,13 +94,42 @@ with col2:
     with col22:
         st.plotly_chart(fig2)
         
+all_data = '''
+SELECT *
+FROM phone_sales
+'''
+data = pd.read_sql_query(all_data, conn)
+
+@st.cache        
+# Function to download Excel file
+def download_excel(df):
+    excel_file = io.BytesIO()
+    writer = pd.ExcelWriter(excel_file, engine='xlsxwriter')
+    df.to_excel(writer, index=False)
+    writer.save()
+    b64 = base64.b64encode(excel_file.getvalue()).decode()
+    href = f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" download="mydata.xlsx">Download Excel</a>'
+    return href   
+
+@st.cache
+def download_json(df):
+    json = df.to_json(indent=2)
+    b64 = base64.b64encode(json.encode()).decode()
+    href = f'<a href="data:application/json;base64,{b64}" download="mydata.json">Download JSON</a>'
+    return href    
+        
 # Create a download button that downloads the DataFrame as a CSV file
-if st.button('Download CSV'):
-    csv = df2.to_csv(index=False)
+with col1.expander('Download Data'):
+    csv = data.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()
     href = f'<a href="data:file/csv;base64,{b64}" download="mydata.csv">Download CSV</a>'
     st.markdown(href, unsafe_allow_html=True)
+    st.markdown(download_excel(data), unsafe_allow_html=True)
+    tmp_download_link = download_json(data)
+    st.markdown(tmp_download_link, unsafe_allow_html=True)
 
+
+    
 
 # Close the database connection
 cur.close()
