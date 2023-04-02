@@ -1,3 +1,8 @@
+"""
+Created on Sunday, 19 March 2023, 03:38:53 WAT
+
+@author: Telrich Data
+"""
 # Importing requires libraries
 import psycopg2
 import streamlit as st
@@ -5,10 +10,20 @@ import pandas as pd
 import plotly.express as px
 import base64
 import io
+import logging
 
-# setting the page size
-st. set_page_config(layout="wide")
+# setting the page size and title
+st.set_page_config(layout="wide", page_title='Database Data Entry Application')
+
+logging.basicConfig(
+    filename='app.log',
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger()
+
 def connect_db():
+    logger.info('Connecting to the database')
     # Set up a connection string
     username = st.secrets['user']
     password = st.secrets['pw']
@@ -22,8 +37,12 @@ def connect_db():
 # Connect to the database
 conn = psycopg2.connect(connect_db())
 cur = conn.cursor()
-
 connect_db()
+logger.info('Connected to the database')
+st.spinner('Connected to the database')
+
+st.markdown("<h1 style='text-align:center;'>Data Entry Application </h1>", unsafe_allow_html=True)
+st.markdown('<center><h2>This is a simple data entry application created for business purpose.</center></h2>', unsafe_allow_html=True)
 # Split the page into two column
 col1, col2 = st.columns([2, 8], gap='large')
 
@@ -61,7 +80,7 @@ if rw_num == 20:
     cur.execute(query)
     conn.commit()
 
-query = 'SELECT * FROM phone_sales ORDER BY id DESC LIMIT 3'
+query = 'SELECT * FROM phone_sales ORDER BY id DESC LIMIT 5'
 df2 = pd.read_sql_query(query, conn)
 
 query3 = '''
@@ -134,3 +153,5 @@ with col1.expander('Download Data'):
 # Close the database connection
 cur.close()
 conn.close()
+# if __name__ = '__main__':
+#     main
