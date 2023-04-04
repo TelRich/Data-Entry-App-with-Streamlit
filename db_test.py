@@ -15,6 +15,7 @@ import io
 # setting the page size and title
 st.set_page_config(layout="wide", page_title='Database Data Entry Application')
 
+# 
 def connect_db():
     # Set up a connection string
     username = st.secrets['user']
@@ -32,7 +33,7 @@ cur = conn.cursor()
 connect_db()
 
 st.markdown("<h1 style='text-align:center;'>Data Entry Application </h1>", unsafe_allow_html=True)
-st.markdown('<center><h2>This is a simple data entry application created for business purpose.</center></h2>', unsafe_allow_html=True)
+st.markdown('<center><h2>A sample data entry application created for business purpose.</center></h2>', unsafe_allow_html=True)
 # Split the page into two column
 col1, col2 = st.columns([2, 8], gap='large')
 
@@ -117,7 +118,7 @@ fig2 = px.bar(df3, 'phone_brand', ['cost_price', 'sold_price'], barmode='group',
 fig2.update_traces(textposition='outside', cliponaxis=False)
 fig2.update_yaxes(showticklabels=False)
 
-with col2.expander(label='table and viz', expanded=True):
+with col2.expander(label='', expanded=True):
     st.header('Table From Remote Database (Last three entry)')
     st.table(df2)
     newTableRw = pd.read_sql_query(row_count, conn)
