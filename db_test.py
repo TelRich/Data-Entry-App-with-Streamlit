@@ -144,7 +144,7 @@ with col1.expander('Download Data'):
     tmp_download_link = download_json(data)
     st.markdown(tmp_download_link, unsafe_allow_html=True)
     
-    col1.image('telrich_logo.png', width=300)
+    col1.image('telrich_logo.png', width=320)
 
 
     
