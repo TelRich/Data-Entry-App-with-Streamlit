@@ -10,20 +10,12 @@ import pandas as pd
 import plotly.express as px
 import base64
 import io
-import logging
+
 
 # setting the page size and title
 st.set_page_config(layout="wide", page_title='Database Data Entry Application')
 
-logging.basicConfig(
-    filename='app.log',
-    level=logging.DEBUG,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger()
-
 def connect_db():
-    logger.info('Connecting to the database')
     # Set up a connection string
     username = st.secrets['user']
     password = st.secrets['pw']
@@ -38,15 +30,13 @@ def connect_db():
 conn = psycopg2.connect(connect_db())
 cur = conn.cursor()
 connect_db()
-logger.info('Connected to the database')
-st.spinner('Connected to the database')
 
 st.markdown("<h1 style='text-align:center;'>Data Entry Application </h1>", unsafe_allow_html=True)
 st.markdown('<center><h2>This is a simple data entry application created for business purpose.</center></h2>', unsafe_allow_html=True)
 # Split the page into two column
 col1, col2 = st.columns([2, 8], gap='large')
 
-with col1:
+with col1.expander(label='Sales Entry', expanded=True):
     st.subheader('Sales Entry')
 
     phone_brand = st.text_input('Enter brand name')
@@ -80,6 +70,13 @@ if rw_num == 20:
     cur.execute(query)
     conn.commit()
 
+hide = """
+  <style>
+  thead tr th:first-child {display:none}
+  tbody th {display:none}
+  </style>
+  """
+st.markdown(hide, True)
 query = 'SELECT * FROM phone_sales ORDER BY id DESC LIMIT 5'
 df2 = pd.read_sql_query(query, conn)
 
@@ -99,7 +96,7 @@ df3 = pd.read_sql_query(query3, conn)
 fig1 = px.bar(df3, 'phone_brand', 'profit')
 fig2 = px.bar(df3, 'phone_brand', ['cost_price', 'sold_price'], barmode='group')
 
-with col2:
+with col2.expander(label='table and viz', expanded=True):
     st.header('Table From Remote Database (Last three entry)')
     st.table(df2)
     newTableRw = pd.read_sql_query(row_count, conn)
@@ -146,6 +143,8 @@ with col1.expander('Download Data'):
     st.markdown(download_excel(data), unsafe_allow_html=True)
     tmp_download_link = download_json(data)
     st.markdown(tmp_download_link, unsafe_allow_html=True)
+    
+    col1.image('telrich_logo.png', width=300)
 
 
     
@@ -153,5 +152,3 @@ with col1.expander('Download Data'):
 # Close the database connection
 cur.close()
 conn.close()
-# if __name__ = '__main__':
-#     main
