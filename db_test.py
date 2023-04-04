@@ -36,11 +36,26 @@ st.markdown('<center><h2>This is a simple data entry application created for bus
 # Split the page into two column
 col1, col2 = st.columns([2, 8], gap='large')
 
+brand = {
+    'Apple':[
+        'iPhone 7', 'iPhone 8', 'iPhone X', 'iPhone 11', 'iPhone 12', 'iPhone 13', 'iPhone 14'
+    ],
+    'Oppo':[
+        'Oppo Reno8', 'Oppo Reno7', 'Oppo Reno5', 'Oppo A96', 'Oppo A77', 'Oppo A57', 'Oppo A16'
+    ],
+    'Samsung': [
+        'Galaxy F14', 'Galaxy S23', 'Galaxy Z Flip', 'Samsung S8', 'Samsung S9', 'Galaxy M14', 'Galaxy A54' 
+    ],
+    'Xiaomi': [
+        'Xiaomi 13', 'Xiaomi 12T', 'Xiaomi 11', 'Xiaomi Mix 4', 'Redmi Note 12S', 'Redmi K60', 'Redmi Note 10'
+    ]
+}
+
 with col1.expander(label='Sales Entry', expanded=True):
     st.subheader('Sales Entry')
 
-    phone_brand = st.text_input('Enter brand name')
-    phone_model = st.text_input('Enter phone model')
+    phone_brand = st.selectbox('Select Brand', brand.keys())
+    phone_model =  st.selectbox('Select Model', brand[phone_brand])
     purchase_date = st.date_input('Enter purchase date')
     sold_date = st.date_input('Enter sold date')
     sold_price = st.number_input('Enter sold price')
