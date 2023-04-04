@@ -51,8 +51,8 @@ brand = {
     ]
 }
 
-with col1.expander(label='Sales Entry', expanded=True):
-    st.subheader('Sales Entry')
+with col1.expander(label='', expanded=True):
+    st.header('Sales Entry')
 
     phone_brand = st.selectbox('Select Brand', brand.keys())
     phone_model =  st.selectbox('Select Model', brand[phone_brand])
@@ -108,8 +108,14 @@ GROUP BY
     phone_brand'''
                 
 df3 = pd.read_sql_query(query3, conn)
-fig1 = px.bar(df3, 'phone_brand', 'profit')
-fig2 = px.bar(df3, 'phone_brand', ['cost_price', 'sold_price'], barmode='group')
+fig1 = px.bar(df3, 'phone_brand', 'profit', text_auto=True, title='<b>Profit by Brand<b>', 
+              labels={'profit':'', 'phone_brand':''})
+fig1.update_yaxes(showticklabels=False)
+fig1.update_traces(textposition='outside', cliponaxis=False)
+fig2 = px.bar(df3, 'phone_brand', ['cost_price', 'sold_price'], barmode='group', title='<b>Cost and Sales by Brand<b>',
+              labels={'value':'', 'phone_brand':''}, text_auto=True)
+fig2.update_traces(textposition='outside', cliponaxis=False)
+fig2.update_yaxes(showticklabels=False)
 
 with col2.expander(label='table and viz', expanded=True):
     st.header('Table From Remote Database (Last three entry)')
