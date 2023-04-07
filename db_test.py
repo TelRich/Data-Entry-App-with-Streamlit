@@ -66,7 +66,6 @@ with col1.expander(label='', expanded=True):
     cost_price = st.number_input('Enter cost price')
     sold_price = st.number_input('Enter sold price')
 
-
     # Saving the entry to the database.
     if st.button('Save Details'):
         query = f'''INSERT INTO phone_sales (phone_brand, phone_model, purchase_date, sold_date, sold_price, cost_price)
@@ -98,6 +97,7 @@ if rw_num >= 55:
     cur.execute(query)
     conn.commit()
 
+# Hiding the numbers on the table
 hide = """
   <style>
   thead tr th:first-child {display:none}
@@ -105,9 +105,12 @@ hide = """
   </style>
   """
 st.markdown(hide, True)
+# Displaying the last five entries in the table
 query = 'SELECT * FROM phone_sales ORDER BY id DESC LIMIT 5'
 df2 = pd.read_sql_query(query, conn)
 
+# VISUALIZING THE ENTRIES
+# Query the database
 query3 = '''
 SELECT 
     phone_brand,
@@ -120,37 +123,43 @@ FROM
 GROUP BY 
     phone_brand'''
                 
+# Profit By Brand
 df3 = pd.read_sql_query(query3, conn)
 fig1 = px.bar(df3, 'phone_brand', 'profit', text_auto=True, title='<b>Profit by Brand<b>', 
               labels={'profit':'', 'phone_brand':''})
 fig1.update_yaxes(showticklabels=False)
 fig1.update_traces(textposition='outside', cliponaxis=False)
+
+# Sales and Cost Price by Brand
 fig2 = px.bar(df3, 'phone_brand', ['cost_price', 'sold_price'], barmode='group', title='<b>Cost and Sales by Brand<b>',
               labels={'value':'', 'phone_brand':''}, text_auto=True)
 fig2.update_traces(textposition='outside', cliponaxis=False)
 fig2.update_yaxes(showticklabels=False)
 
+# Display table latest entry and visualization
 with col2.expander(label='', expanded=True):
-    st.header('Table From Remote Database (Last three entry)')
+    st.header('The last five entries in the table')
     st.table(df2)
-    newTableRw = pd.read_sql_query(row_count, conn)
-    newRwNum = newTableRw['table_rows'][0]
-    text1 = f'There are a total of {newRwNum} rows in the database'
-    st.write(text1)
-   
+    # newTableRw = pd.read_sql_query(row_count, conn)
+    # newRwNum = newTableRw['table_rows'][0]
+    # text1 = f'There are a total of {newRwNum} rows in the database'
+    # st.write(text1)
+    
+    st.header('Entries Visualization')
     col21, col22 = st.columns(2)
     with col21:
         st.plotly_chart(fig1)
     with col22:
         st.plotly_chart(fig2)
-        
+
+# Download the data in the table        
 all_data = '''
 SELECT *
 FROM phone_sales
 '''
 data = pd.read_sql_query(all_data, conn)
 
-@st.cache        
+@st.cache_data        
 # Function to download Excel file
 def download_excel(df):
     excel_file = io.BytesIO()
@@ -161,7 +170,8 @@ def download_excel(df):
     href = f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" download="mydata.xlsx">Download Excel</a>'
     return href   
 
-@st.cache
+@st.cache_data
+# Function to download JSON file
 def download_json(df):
     json = df.to_json(indent=2)
     b64 = base64.b64encode(json.encode()).decode()
@@ -170,18 +180,16 @@ def download_json(df):
         
 # Create a download button that downloads the DataFrame as a CSV file
 with col1.expander('Download Data'):
+    # Download csv file
     csv = data.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()
     href = f'<a href="data:file/csv;base64,{b64}" download="mydata.csv">Download CSV</a>'
+    # Download options
     st.markdown(href, unsafe_allow_html=True)
     st.markdown(download_excel(data), unsafe_allow_html=True)
-    tmp_download_link = download_json(data)
-    st.markdown(tmp_download_link, unsafe_allow_html=True)
+    st.markdown(download_json(data), unsafe_allow_html=True)
     
     col1.image('telrich_logo.png', width=320)
-
-
-    
 
 # Close the database connection
 cur.close()
