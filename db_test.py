@@ -1,9 +1,9 @@
 """
-Created on Sunday, 19 March 2023, 03:38:53 WAT
+@Created on: Sunday, 19 March 2023, 03:38:53 WAT
 
 @author: Telrich Data
 """
-# Importing requires libraries
+# Importing required libraries
 import psycopg2
 import streamlit as st
 import pandas as pd
@@ -15,7 +15,7 @@ import io
 # setting the page size and title
 st.set_page_config(layout="wide", page_title='Database Data Entry Application')
 
-# 
+# Function to connect to the database
 def connect_db():
     # Set up a connection string
     username = st.secrets['user']
@@ -27,16 +27,20 @@ def connect_db():
     conn_str = f"postgresql://{username}:{password}@{host}:{port}/{database}?sslmode={sslmode}"
     return conn_str
 
-# Connect to the database
+# Connecting to the database and initializing cursor
 conn = psycopg2.connect(connect_db())
 cur = conn.cursor()
 connect_db()
 
+# App Setup
 st.markdown("<h1 style='text-align:center;'>Data Entry Application </h1>", unsafe_allow_html=True)
 st.markdown('<center><h2>A sample data entry application created for business purpose.</center></h2>', unsafe_allow_html=True)
+
+
 # Split the page into two column
 col1, col2 = st.columns([2, 8], gap='large')
 
+# Creating Phone Brands and model
 brand = {
     'Apple':[
         'iPhone 7', 'iPhone 8', 'iPhone X', 'iPhone 11', 'iPhone 12', 'iPhone 13', 'iPhone 14'
@@ -52,22 +56,25 @@ brand = {
     ]
 }
 
+# Sales Entry 
 with col1.expander(label='', expanded=True):
     st.header('Sales Entry')
-
     phone_brand = st.selectbox('Select Brand', brand.keys())
     phone_model =  st.selectbox('Select Model', brand[phone_brand])
     purchase_date = st.date_input('Enter purchase date')
     sold_date = st.date_input('Enter sold date')
-    sold_price = st.number_input('Enter sold price')
     cost_price = st.number_input('Enter cost price')
+    sold_price = st.number_input('Enter sold price')
 
+
+    # Saving the entry to the database.
     if st.button('Save Details'):
         query = f'''INSERT INTO phone_sales (phone_brand, phone_model, purchase_date, sold_date, sold_price, cost_price)
         VALUES ('{phone_brand}', '{phone_model}', '{purchase_date}', '{sold_date}', '{sold_price}', '{cost_price}')'''
         cur.execute(query)
         conn.commit()
 
+# Counting the number of rows in the database table
 row_count = '''
 SELECT 
     COUNT(*) table_rows
@@ -78,10 +85,11 @@ table_rw = pd.read_sql_query(row_count, conn)
 rw_num= table_rw['table_rows'][0]
 col1.write(f'There are now {rw_num} rows in the table')
 
-if rw_num == 20:
+if rw_num == 9:
     query = """
     DELETE FROM phone_sales
-    WHERE id <=5  
+    ORDER BY id DESC
+    LIMIT 5;
     """
     cur.execute(query)
     conn.commit()
