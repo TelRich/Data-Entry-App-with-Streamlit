@@ -85,11 +85,15 @@ table_rw = pd.read_sql_query(row_count, conn)
 rw_num= table_rw['table_rows'][0]
 col1.write(f'There are now {rw_num} rows in the table')
 
-if rw_num == 9:
+if rw_num >= 55:
     query = """
     DELETE FROM phone_sales
-    ORDER BY id DESC
-    LIMIT 5;
+    WHERE id IN (
+        SELECT id
+        FROM phone_sales
+        ORDER BY id 
+        LIMIT 5
+        );
     """
     cur.execute(query)
     conn.commit()
