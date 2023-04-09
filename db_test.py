@@ -33,7 +33,7 @@ cur = conn.cursor()
 connect_db()
 
 # App Setup
-st.markdown("<h1 style='text-align:center;'>Streamlit Data Entry App with Azure Postgres Database and Power BI Visualization</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align:center;'>Streamlit Data Entry App with Azure Postgres Database</h1>", unsafe_allow_html=True)
 st.markdown('<center><h2>A sample data entry application created for business purpose.</center></h2>', unsafe_allow_html=True)
 
 
@@ -208,7 +208,7 @@ with col1.expander('Contact', expanded=True):
 
 with col2.expander('Documentation'):
     st.markdown("""
-             Title: Streamlit Data Entry App with Azure Postgres Database and Power BI Visualization
+             ## Streamlit Data Entry App with Azure Postgres Database
 
             >**Introduction**:
             
@@ -239,7 +239,7 @@ with col2.expander('Documentation'):
              
              """)
 
-st.markdown('<iframe title="Report Section" width="600" height="373.5" src="https://app.powerbi.com/view?r=eyJrIjoiNjI2MTYzNTMtOGZmZC00ZDA3LThkYTktYjJjN2U0MGQzYjYxIiwidCI6ImNlMzBlNGMzLWM4NjItNGVlZC1hMzdjLWU3NmJjODNhY2ZmYSJ9" frameborder="0" allowFullScreen="true"></iframe>', unsafe_allow_html=True)
+    # st.markdown('<iframe title="Report Section" width="600" height="373.5" src="https://app.powerbi.com/view?r=eyJrIjoiNjI2MTYzNTMtOGZmZC00ZDA3LThkYTktYjJjN2U0MGQzYjYxIiwidCI6ImNlMzBlNGMzLWM4NjItNGVlZC1hMzdjLWU3NmJjODNhY2ZmYSJ9" frameborder="0" allowFullScreen="true"></iframe>', unsafe_allow_html=True)
     
 
 # Close the database connection
