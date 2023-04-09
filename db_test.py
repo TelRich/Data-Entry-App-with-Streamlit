@@ -33,7 +33,7 @@ cur = conn.cursor()
 connect_db()
 
 # App Setup
-st.markdown("<h1 style='text-align:center;'>Data Entry Application </h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align:center;'>Streamlit Data Entry App with Azure Postgres Database and Power BI Visualization</h1>", unsafe_allow_html=True)
 st.markdown('<center><h2>A sample data entry application created for business purpose.</center></h2>', unsafe_allow_html=True)
 
 
@@ -135,6 +135,17 @@ fig2 = px.bar(df3, 'phone_brand', ['cost_price', 'sold_price'], barmode='group',
               labels={'value':'', 'phone_brand':''}, text_auto=True)
 fig2.update_traces(textposition='outside', cliponaxis=False)
 fig2.update_yaxes(showticklabels=False)
+fig2.update_layout(legend = dict(
+                        orientation='v',
+                        title='',
+                        font = dict(
+                        family="Courier",
+                        size=12,
+                        ),
+                        bgcolor='olive',
+                        bordercolor='blue',
+                        borderwidth=.5
+                    ))
 
 # Display table latest entry and visualization
 with col2.expander(label='', expanded=True):
@@ -148,9 +159,9 @@ with col2.expander(label='', expanded=True):
     st.header('Entries Visualization')
     col21, col22 = st.columns(2)
     with col21:
-        st.plotly_chart(fig1)
+        st.plotly_chart(fig1, use_container_width=True)
     with col22:
-        st.plotly_chart(fig2)
+        st.plotly_chart(fig2, use_container_width=True)
 
 # Download the data in the table        
 all_data = '''
@@ -189,7 +200,47 @@ with col1.expander('Download Data'):
     st.markdown(download_excel(data), unsafe_allow_html=True)
     st.markdown(download_json(data), unsafe_allow_html=True)
     
-    col1.image('telrich_logo.png', width=320)
+with col1.expander('Contact', expanded=True):
+    st.image('telrich_logo.png', width=100)
+    st.markdown("[LinkedIn](https://www.linkedin.com/in/goodrichokoro/) \
+        | [Twitter](https://twitter.com/OkoroGoodrich) \
+        | [GitHub](https://github.com/TelRich)", unsafe_allow_html=True)
+
+with col2.expander('Documentation'):
+    st.markdown("""
+             Title: Streamlit Data Entry App with Azure Postgres Database and Power BI Visualization
+
+            >**Introduction**:
+            
+            This documentation provides an overview of a data entry application developed using Streamlit and connected to an Azure Postgres database. 
+            The app enables users to enter data that is stored in the database, and it includes a dynamic visualization that updates based on the latest entry. 
+            Additionally, Power BI is connected to the same database to generate data visualizations.
+
+            >**Technologies**:
+            
+            * Streamlit
+            * Python
+            * Azure Postgres Database
+            * Power BI
+            
+            >**Functionality**:
+            
+            1. The data entry app allows users to input data and save it to an Azure Postgres database. The app provides a user-friendly interface for data entry, with input fields for various data points. 
+            Once the user submits the data, it is stored in the database.
+
+            2. The app also includes a dynamic visualization that updates in real-time based on the latest data entry. This provides users with immediate feedback on the data that they enter and allows for quick analysis.
+
+            3. Furthermore, Power BI is connected to the same Azure Postgres database to generate data visualizations. This allows for more in-depth analysis of the data collected through the app, and provides additional insights for decision making.
+
+            > **Conclusion**:
+            
+            The Streamlit data entry app with an Azure Postgres database and Power BI visualization provides a robust and user-friendly solution for data collection and analysis. The app's interface and dynamic visualization make data entry and analysis quick and efficient, 
+            while the connection to Power BI allows for more in-depth analysis and visualization. Overall, this app provides a comprehensive solution for data collection and analysis needs.
+             
+             """)
+
+st.markdown('<iframe title="Report Section" width="600" height="373.5" src="https://app.powerbi.com/view?r=eyJrIjoiNjI2MTYzNTMtOGZmZC00ZDA3LThkYTktYjJjN2U0MGQzYjYxIiwidCI6ImNlMzBlNGMzLWM4NjItNGVlZC1hMzdjLWU3NmJjODNhY2ZmYSJ9" frameborder="0" allowFullScreen="true"></iframe>', unsafe_allow_html=True)
+    
 
 # Close the database connection
 cur.close()
