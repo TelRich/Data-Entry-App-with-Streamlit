@@ -223,9 +223,10 @@ with col2.expander('Documentation'):
 
             >**Project Overview**
 
-            _Objective_: The objective of the project is to build an app that takes in users input an save it to the remote database.
+            *Objective*: The objective of this project is to provide a user-friendly data entry app with advanced features, such as database integration, visualization, and Power BI integration, that can be used for small to medium-sized projects.
 
-            _Goal_: The goal is to automate the data analysis process as the data is being entered into the database
+            *Goal*: The goal of this project is to create a tool that simplifies the data entry process, allows users to view and analyze their data, and provides valuable insights that can be used to make informed decisions. 
+            The app should be easy to use and accessible from anywhere, ensuring that users can collect and analyze data on-the-go.
 
             >**Technologies**:
 
