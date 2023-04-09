@@ -118,15 +118,14 @@ SELECT
     phone_brand,
     SUM(profit) profit, 
     SUM(cost_price) cost_price, 
-    SUM(sold_price) 
-    sold_price 
+    SUM(sold_price) sold_price 
 FROM 
     phone_sales 
 GROUP BY 
     phone_brand'''
                 
 # Profit By Brand
-df3 = pd.read_sql_query(query3, conn)
+df3 = pd.read_sql_query(query3, conn).sort_values(by=['profit', 'sold_price'], ascending=False)
 fig1 = px.bar(df3, 'phone_brand', 'profit', text_auto=True, title='<b>Profit by Brand<b>', 
               labels={'profit':'', 'phone_brand':''},
               color_discrete_sequence=px.colors.qualitative.Set3)
