@@ -35,7 +35,7 @@ connect_db()
 # App Setup
 st.markdown("<h1 style='text-align:center;'>Streamlit Data Entry App with Azure Postgres Database</h1>", unsafe_allow_html=True)
 st.markdown('''<center><h2>A sample data entry application created for business purpose.</center></h2>''', unsafe_allow_html=True)
-st.markdown('''<center><h3>How to use the app: Make an entry on the left and watch the table and charts change. 😊
+st.markdown('''<center><h3>How to use the app: Make an entry on the left and watch the table and charts change.😊
             </center></h3>''', unsafe_allow_html=True)
 
 
@@ -128,13 +128,15 @@ GROUP BY
 # Profit By Brand
 df3 = pd.read_sql_query(query3, conn)
 fig1 = px.bar(df3, 'phone_brand', 'profit', text_auto=True, title='<b>Profit by Brand<b>', 
-              labels={'profit':'', 'phone_brand':''})
+              labels={'profit':'', 'phone_brand':''},
+              color_discrete_sequence=px.colors.qualitative.Set3)
 fig1.update_yaxes(showticklabels=False)
 fig1.update_traces(textposition='outside', cliponaxis=False)
 
 # Sales and Cost Price by Brand
 fig2 = px.bar(df3, 'phone_brand', ['cost_price', 'sold_price'], barmode='group', title='<b>Cost and Sales by Brand<b>',
-              labels={'value':'', 'phone_brand':''}, text_auto=True)
+              labels={'value':'', 'phone_brand':''}, text_auto=True,
+              color_discrete_sequence=px.colors.qualitative.Set2)
 fig2.update_traces(textposition='outside', cliponaxis=False)
 fig2.update_yaxes(showticklabels=False)
 fig2.update_layout(legend = dict(
@@ -205,9 +207,9 @@ with col1.expander('Download Data'):
 with col1.expander('Contact', expanded=True):
     st.image('telrich_logo.png', width=100)
     st.markdown("[LinkedIn](https://www.linkedin.com/in/goodrichokoro/) \
-        | [Mail](okorogoodrich@gmail.com)\
         | [Twitter](https://twitter.com/OkoroGoodrich) \
-        | [GitHub](https://github.com/TelRich)", unsafe_allow_html=True)
+        | [GitHub](https://github.com/TelRich)\
+        | okorogoodrich@gmail.com", unsafe_allow_html=True)
 
 with col2.expander('Documentation'):
     st.markdown("""
