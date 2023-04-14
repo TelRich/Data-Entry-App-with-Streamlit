@@ -1,8 +1,17 @@
 """
-@Created on: Sunday, 19 March 2023, 03:38:53 WAT
+@Created on: Friday, 14 April 2023, 20:33:53 WAT
 
 @author: Telrich Data
 """
+
+tonight_task = [....]
+postpone_list = []
+for task in tonight_task:
+    postpone_list.append(task)
+print("Done. All task shifted to tomorrow")
+print("Goodnight Rich 😴")
+
+
 # Importing required libraries
 import psycopg2
 import streamlit as st
