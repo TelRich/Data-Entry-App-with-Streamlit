@@ -99,6 +99,13 @@ if rw_num >= 55:
     cur.execute(query)
     conn.commit()
 
+query = """
+    DELETE FROM phone_sales
+    WHERE id = 26);
+    """
+cur.execute(query)
+conn.commit()
+
 # Hiding the numbers on the table
 hide = """
   <style>
