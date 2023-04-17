@@ -101,7 +101,7 @@ if rw_num >= 55:
 
 query = """
     DELETE FROM phone_sales
-    WHERE id = 26);
+    WHERE id = 26;
     """
 cur.execute(query)
 conn.commit()
