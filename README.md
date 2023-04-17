@@ -18,6 +18,7 @@ _Goal_: The goal is to automate the data analysis process as the data is being e
 
 * Streamlit
 * Python
+* PostgreSQL
 * Azure Postgres Database
 * Python Plotly
 * Power BI
