@@ -1,7 +1,8 @@
 """
-@Created on: Sunday, 19 March 2023, 03:38:53 WAT
+@Created on: Sunday, 19 March 2023, 03:38:53 PM WAT
 
-@author: Telrich Data
+@Author: TelRich Data
+
 """
 # Importing required libraries
 import psycopg2
