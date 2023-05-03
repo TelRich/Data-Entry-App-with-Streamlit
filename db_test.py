@@ -213,6 +213,7 @@ with col1.expander('Download Data'):
     st.markdown(download_excel(data), unsafe_allow_html=True)
     st.markdown(download_json(data), unsafe_allow_html=True)
     
+    
 with col1.expander('Contact', expanded=True):
     st.image('telrich_logo.png', width=100)
     st.markdown("[LinkedIn](https://www.linkedin.com/in/goodrichokoro/) \
