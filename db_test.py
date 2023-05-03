@@ -183,16 +183,16 @@ FROM phone_sales
 '''
 data = pd.read_sql_query(all_data, conn)
 
-@st.cache_data        
-# Function to download Excel file
-def download_excel(df):
-    excel_file = io.BytesIO()
-    writer = pd.ExcelWriter(excel_file, engine='xlsxwriter')
-    df.to_excel(writer, index=False)
-    writer.save()
-    b64 = base64.b64encode(excel_file.getvalue()).decode()
-    href = f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" download="mydata.xlsx">Download Excel</a>'
-    return href   
+# @st.cache_data        
+# # Function to download Excel file
+# def download_excel(df):
+#     excel_file = io.BytesIO()
+#     writer = pd.ExcelWriter(excel_file, engine='xlsxwriter')
+#     df.to_excel(writer, index=False)
+#     writer.save()
+#     b64 = base64.b64encode(excel_file.getvalue()).decode()
+#     href = f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" download="mydata.xlsx">Download Excel</a>'
+#     return href   
 
 @st.cache_data
 # Function to download JSON file
@@ -210,7 +210,7 @@ with col1.expander('Download Data'):
     href = f'<a href="data:file/csv;base64,{b64}" download="mydata.csv">Download CSV</a>'
     # Download options
     st.markdown(href, unsafe_allow_html=True)
-    st.markdown(download_excel(data), unsafe_allow_html=True)
+    # st.markdown(download_excel(data), unsafe_allow_html=True)
     st.markdown(download_json(data), unsafe_allow_html=True)
     
     
