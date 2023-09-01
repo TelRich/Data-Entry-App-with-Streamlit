@@ -1,6 +1,6 @@
 # Streamlit Data Entry App with Azure Postgres Database
 
-[View Application](https://telrich-streamlit-database-connection-test-db-test-cdg8zc.streamlit.app/)
+# [View Application](https://telrich-streamlit-database-connection-test-db-test-cdg8zc.streamlit.app/)
 
 >**Introduction**:
 
