@@ -305,7 +305,7 @@ with col1.expander('Contact', expanded=True):
         | [GitHub](https://github.com/TelRich)\
         | okorogoodrich@gmail.com", unsafe_allow_html=True)
 
-with col2.expander(':red[Power BI Table]', expanded=True):
+with col2.expander(':red[Power BI Table]', expanded=False):
   power = """<iframe title="Report Section" width="800" height="700" 
               src="https://app.powerbi.com/view?r=eyJrIjoiNjI2MTYzNTMtOGZmZC00ZDA3LThkYTktYjJjN2U0MGQzYjYxIiwidCI6ImNlMzBlNGMzLWM4NjItNGVlZC1hMzdjLWU3NmJjODNhY2ZmYSJ9" 
               frameborder="0" allowFullScreen="true"></iframe>"""
