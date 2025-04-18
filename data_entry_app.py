@@ -5,37 +5,81 @@
 
 """
 # Importing required libraries
-import psycopg2
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import base64
 import io
+import logging
+from contextlib import contextmanager
+from sqlalchemy import create_engine, text
+import urllib.parse
+import time
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('app.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
 # setting the page size and title
 st.set_page_config(layout="wide", page_title='Database Data Entry Application')
 
 # Function to connect to the database
 def connect_db():
-    # Set up a connection string
     username = st.secrets['user']
-    password = st.secrets['pw']
-    # host = 'telrichserver.postgres.database.azure.com'
+    password = urllib.parse.quote_plus(st.secrets['pw'])  # URL encode the password
     host = st.secrets['host']
     database = st.secrets['db']
-    # database = 'phone_db'
-    # port = '5432'  # or your specified port number
     port = st.secrets['port']
-    sslmode = 'prefer'  # or 'prefer' if you don't want to use SSL encryption
-    # sslmode = 'require'  # or 'prefer' if you don't want to use SSL encryption
+    sslmode = 'prefer'
+    
+    # Create SQLAlchemy connection string
     conn_str = f"postgresql://{username}:{password}@{host}:{port}/{database}?sslmode={sslmode}"
-    return conn_str
+    return create_engine(conn_str)
 
-# Connecting to the database and initializing cursor
-conn = psycopg2.connect(connect_db())
-cur = conn.cursor()
-connect_db()
+# Create engine
+engine = connect_db()
+
+# Replace the psycopg2 connection with SQLAlchemy engine
+try:
+    with engine.connect() as connection:
+        connection.execute(text("SELECT 1"))  # Test connection
+except Exception as e:
+    logger.error(f"Failed to connect to database: {e}")
+    st.error("Failed to connect to database. Please check logs for details.")
+    st.stop()
+
+def init_database():
+    """Initialize database by creating required tables if they don't exist."""
+    create_table_query = """
+    CREATE TABLE IF NOT EXISTS phone_sales (
+        id SERIAL PRIMARY KEY,
+        phone_brand VARCHAR(50),
+        phone_model VARCHAR(50),
+        purchase_date DATE,
+        sold_date DATE,
+        sold_price DECIMAL(10,2),
+        cost_price DECIMAL(10,2),
+        profit DECIMAL(10,2) GENERATED ALWAYS AS (sold_price - cost_price) STORED
+    );
+    """
+    try:
+        with engine.connect() as conn:
+            conn.execute(text(create_table_query))
+            conn.commit()
+            logger.info("Database initialized successfully")
+    except Exception as e:
+        logger.error(f"Database initialization failed: {e}")
+        st.error("Failed to initialize database. Please check logs for details.")
+
+# Initialize database when app starts
+init_database()
 
 # App Setup
 st.markdown("<h1 style='text-align:center;'>Streamlit Data Entry App with Azure Postgres Database</h1>", unsafe_allow_html=True)
@@ -75,43 +119,94 @@ with col1.expander(label='', expanded=True):
 
     # Saving the entry to the database.
     if st.button('Save Details'):
-        query = f'''INSERT INTO phone_sales (phone_brand, phone_model, purchase_date, sold_date, sold_price, cost_price)
-        VALUES ('{phone_brand}', '{phone_model}', '{purchase_date}', '{sold_date}', '{sold_price}', '{cost_price}')'''
-        cur.execute(query)
-        conn.commit()
+        try:
+            query = text('''INSERT INTO phone_sales (phone_brand, phone_model, purchase_date, sold_date, sold_price, cost_price)
+            VALUES (:brand, :model, :p_date, :s_date, :s_price, :c_price)''')
+            with engine.connect() as conn:
+                conn.execute(query, {
+                    'brand': phone_brand,
+                    'model': phone_model,
+                    'p_date': purchase_date,
+                    's_date': sold_date,
+                    's_price': sold_price,
+                    'c_price': cost_price
+                })
+                conn.commit()
+            logger.info(f"Successfully added new entry for {phone_brand} {phone_model}")
+            st.success("Data saved successfully!")
+        except Exception as e:
+            logger.error(f"Failed to save data: {e}")
+            st.error("Failed to save data. Please try again.")
 
 # Counting the number of rows in the database table
-row_count = '''
-SELECT 
-    COUNT(*) table_rows
-FROM
-    phone_sales
-'''
-table_rw = pd.read_sql_query(row_count, conn)
-rw_num= table_rw['table_rows'][0]
-col1.write(f'There are now {rw_num} rows in the table')
+try:
+    row_count = '''
+    SELECT COUNT(*) table_rows
+    FROM phone_sales
+    '''
+    table_rw = pd.read_sql_query(text(row_count), engine)
+    rw_num = table_rw['table_rows'][0]
+    col1.write(f'There are now {rw_num} rows in the table')
+except Exception as e:
+    logger.error(f"Failed to count rows: {e}")
+    col1.error("Failed to retrieve row count")
 
-if rw_num >= 55:
+# Maintain 100 rows limit by deleting oldest entries
+if rw_num > 100:
     query = """
     DELETE FROM phone_sales
     WHERE id IN (
         SELECT id
         FROM phone_sales
         ORDER BY id 
-        LIMIT 5
-        );
+        LIMIT (SELECT COUNT(*) - 100 FROM phone_sales)
+    );
     """
-    cur.execute(query)
-    conn.commit()
+    try:
+        with engine.connect() as conn:
+            conn.execute(text(query))
+            conn.commit()
+            logger.info("Deleted oldest entries to maintain 100 row limit")
+    except Exception as e:
+        logger.error(f"Failed to delete rows: {e}")
+        st.error("Failed to delete rows. Please check logs for details.")
 
-# Deletion of abnormal row
+# Initialize session state for reset confirmation
+if 'reset_clicked' not in st.session_state:
+    st.session_state.reset_clicked = False
 
-# query = """
-#     DELETE FROM phone_sales
-#     WHERE id = 26;
-#     """
-# cur.execute(query)
-# conn.commit()
+# Add danger zone section
+with col1.expander('⚠️ Danger Zone', expanded=False):
+    st.markdown("""
+    ### Reset Database Table
+    This will permanently delete all data from the table. This action cannot be undone.
+    """)
+    
+    if not st.session_state.reset_clicked:
+        if st.button('Reset Table', type='primary', use_container_width=True):
+            st.session_state.reset_clicked = True
+            st.rerun()
+    else:
+        st.warning('⚠️ Are you sure? This action cannot be undone!')
+        colA, colB = st.columns(2)
+        if colA.button('Yes, Reset', type='primary', use_container_width=True):
+            try:
+                drop_query = "DROP TABLE IF EXISTS phone_sales;"
+                with engine.connect() as conn:
+                    conn.execute(text(drop_query))
+                    conn.commit()
+                init_database()
+                st.session_state.reset_clicked = False
+                logger.info("Table was reset by user")
+                st.success("Table has been reset successfully!")
+                time.sleep(1)
+                st.rerun()
+            except Exception as e:
+                logger.error(f"Failed to reset table: {e}")
+                st.error("Failed to reset table. Please check logs for details.")
+        if colB.button('No, Cancel', use_container_width=True):
+            st.session_state.reset_clicked = False
+            st.rerun()
 
 # Hiding the numbers on the table
 hide = """
@@ -123,7 +218,7 @@ hide = """
 st.markdown(hide, True)
 # Displaying the last five entries in the table
 query = 'SELECT * FROM phone_sales ORDER BY id DESC LIMIT 5'
-df2 = pd.read_sql_query(query, conn)
+df2 = pd.read_sql_query(text(query), engine)
 
 # VISUALIZING THE ENTRIES
 # Query the database
@@ -139,7 +234,7 @@ GROUP BY
     phone_brand'''
                 
 # Profit By Brand
-df3 = pd.read_sql_query(query3, conn).sort_values(by=['profit', 'sold_price'], ascending=False)
+df3 = pd.read_sql_query(text(query3), engine).sort_values(by=['profit', 'sold_price'], ascending=False)
 fig1 = px.bar(df3, 'phone_brand', 'profit', text_auto=True, title='<b>Profit by Brand<b>', 
               labels={'profit':'', 'phone_brand':''},
               color_discrete_sequence=px.colors.qualitative.Set3)
@@ -168,10 +263,6 @@ fig2.update_layout(legend = dict(
 with col2.expander(label='', expanded=True):
     st.header('The last five entries in the table')
     st.table(df2)
-    # newTableRw = pd.read_sql_query(row_count, conn)
-    # newRwNum = newTableRw['table_rows'][0]
-    # text1 = f'There are a total of {newRwNum} rows in the database'
-    # st.write(text1)
     
     st.header('Data Visualization')
     col21, col22 = st.columns(2)
@@ -185,18 +276,7 @@ all_data = '''
 SELECT *
 FROM phone_sales
 '''
-data = pd.read_sql_query(all_data, conn)
-
-# @st.cache_data        
-# # Function to download Excel file
-# def download_excel(df):
-#     excel_file = io.BytesIO()
-#     writer = pd.ExcelWriter(excel_file, engine='xlsxwriter')
-#     df.to_excel(writer, index=False)
-#     writer.save()
-#     b64 = base64.b64encode(excel_file.getvalue()).decode()
-#     href = f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" download="mydata.xlsx">Download Excel</a>'
-#     return href   
+data = pd.read_sql_query(text(all_data), engine)
 
 @st.cache_data
 # Function to download JSON file
@@ -214,7 +294,6 @@ with col1.expander('Download Data'):
     href = f'<a href="data:file/csv;base64,{b64}" download="mydata.csv">Download CSV</a>'
     # Download options
     st.markdown(href, unsafe_allow_html=True)
-    # st.markdown(download_excel(data), unsafe_allow_html=True)
     st.markdown(download_json(data), unsafe_allow_html=True)
     
     
@@ -230,10 +309,16 @@ with col2.expander('Documentation'):
             # Streamlit Data Entry App with Azure Postgres Database
 
             >**Introduction**:
-
+            
             This documentation provides an overview of a data entry application developed using Streamlit and connected to an Azure Postgres database. 
             The app allows users to enter data into a form and saves the in the database.
             The app also includes a visualization that changes with respect to the latest entry. In addition, users can download the data from the database. On the other end, Power BI is connected to the same database to generate data visualizations.
+
+            >**Important Database Limitations**:
+            
+            * The database table is limited to 100 rows to optimize performance and manage data storage efficiently
+            * When the limit is reached, older entries are automatically removed to make room for new ones
+            * A reset function is available in the Danger Zone section to clear all data if needed
 
             >**Project Overview**
 
@@ -254,7 +339,7 @@ with col2.expander('Documentation'):
 
             1. Data Entry: The app allows users to enter data into a form and save it in an Azure Postgres database. The form has been designed to ensure that all necessary data is collected.
 
-            2. Database Integration: The app is connected to an Azure Postgres database where all the data entered in the form is saved. The database table has been set to accumulate a maximum of 55 rows to avoid excessive data accumulation.
+            2. Database Integration: The app is connected to an Azure Postgres database where all the data entered in the form is saved. The database table has been set to accumulate a maximum of 100 rows to avoid excessive data accumulation.
 
             3. Visualization: The app includes a plotly visualization that changes with respect to the latest entry. The visualization provides a quick overview of the data entered and helps users to understand the trends and patterns.
 
@@ -272,10 +357,3 @@ with col2.expander('Documentation'):
             * More data storage is provided, as are additional charts displaying various other insights.
             
              """)
-
-    # st.markdown('<iframe title="Report Section" width="600" height="373.5" src="https://app.powerbi.com/view?r=eyJrIjoiNjI2MTYzNTMtOGZmZC00ZDA3LThkYTktYjJjN2U0MGQzYjYxIiwidCI6ImNlMzBlNGMzLWM4NjItNGVlZC1hMzdjLWU3NmJjODNhY2ZmYSJ9" frameborder="0" allowFullScreen="true"></iframe>', unsafe_allow_html=True)
-    
-
-# Close the database connection
-cur.close()
-conn.close()
