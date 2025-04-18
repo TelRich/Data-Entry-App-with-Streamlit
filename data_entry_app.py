@@ -15,6 +15,7 @@ from contextlib import contextmanager
 from sqlalchemy import create_engine, text
 import urllib.parse
 import time
+import streamlit.components.v1 as components
 
 # Configure logging
 logging.basicConfig(
@@ -304,6 +305,12 @@ with col1.expander('Contact', expanded=True):
         | [GitHub](https://github.com/TelRich)\
         | okorogoodrich@gmail.com", unsafe_allow_html=True)
 
+with col2.expander(':red[Power BI Table]', expanded=True):
+  power = """<iframe title="Report Section" width="800" height="700" 
+              src="https://app.powerbi.com/view?r=eyJrIjoiNjI2MTYzNTMtOGZmZC00ZDA3LThkYTktYjJjN2U0MGQzYjYxIiwidCI6ImNlMzBlNGMzLWM4NjItNGVlZC1hMzdjLWU3NmJjODNhY2ZmYSJ9" 
+              frameborder="0" allowFullScreen="true"></iframe>"""
+  components.html(power, height=800, width=1000)
+    
 with col2.expander('Documentation'):
     st.markdown("""
             # Streamlit Data Entry App with Azure Postgres Database
