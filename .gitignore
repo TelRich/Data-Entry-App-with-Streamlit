@@ -6,3 +6,7 @@ Phone Database.pbix
 __pycache__/
 *.pyc
 config.json
+CODE_EXPLANATION.md
+RECORDING_DETAILED.md
+RECORDING_GUIDE.md
+.gitignore
